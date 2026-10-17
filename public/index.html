@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>자율성과지표 관리</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700&display=swap">
+<style>
+/* 인터넷이 없으면 글꼴은 맑은 고딕/애플 고딕으로 자동 대체됩니다 */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#16233D; --muted:#5B6782; --line:#DDE3EC; --soft:#E9EEF5;
+  --accent:#1E4C8A; --accent-soft:#E3ECF8; --teal:#2C7A74;
+  --rail:#16233D; --rail-ink:#C9D3E4; --rail-active:#FFFFFF; --rail-line:#2A3A5A;
+  --good:#2D7A4E; --good-bg:#E4F2EA; --warn:#A86C12; --warn-bg:#FBF0DC; --bad:#B03838; --bad-bg:#F9E3E3;
+  --idle:#8C97AC; --idle-bg:#EEF1F6; --scrim:rgba(13,20,34,.45);
+  --f-display:"Noto Serif KR","Nanum Myeongjo","Batang",Georgia,serif;
+  --f-body:"IBM Plex Sans KR","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1422; --surface:#141D2F; --ink:#E5EAF3; --muted:#98A4BB; --line:#26324A; --soft:#1F2A40;
+  --accent:#8AB0E6; --accent-soft:#1D2C47; --teal:#62B5AD;
+  --rail:#0A101C; --rail-ink:#93A0B8; --rail-active:#FFFFFF; --rail-line:#1E2A40;
+  --good:#6CC28F; --good-bg:#16302A; --warn:#E2AE5C; --warn-bg:#352A17; --bad:#EE8A8A; --bad-bg:#3A1E22;
+  --idle:#7A86A0; --idle-bg:#1C2639; --scrim:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1422; --surface:#141D2F; --ink:#E5EAF3; --muted:#98A4BB; --line:#26324A; --soft:#1F2A40;
+  --accent:#8AB0E6; --accent-soft:#1D2C47; --teal:#62B5AD;
+  --rail:#0A101C; --rail-ink:#93A0B8; --rail-active:#FFFFFF; --rail-line:#1E2A40;
+  --good:#6CC28F; --good-bg:#16302A; --warn:#E2AE5C; --warn-bg:#352A17; --bad:#EE8A8A; --bad-bg:#3A1E22;
+  --idle:#7A86A0; --idle-bg:#1C2639; --scrim:rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;font-variant-numeric:tabular-nums;word-break:keep-all}
+a{color:inherit}
+button,input,textarea{font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+
+.rail{background:var(--rail);color:var(--rail-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:28px 0 24px}
+.brand{padding:0 24px 22px;border-bottom:1px solid var(--rail-line)}
+.brand .univ{font-size:12px;letter-spacing:.04em}
+.brand .name{font-family:var(--f-display);font-weight:600;font-size:18px;color:var(--rail-active);line-height:1.4;margin-top:4px}
+.nav{display:flex;flex-direction:column;gap:2px;padding:18px 12px;flex:1;overflow-y:auto}
+.nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:9px 12px;border-radius:6px;font-size:14px;font-weight:500}
+.nav a:hover,.nav a.on{background:var(--rail-line);color:var(--rail-active)}
+.nav a.on::before{content:"";width:3px;height:16px;background:var(--teal);border-radius:2px;margin-left:-4px}
+.nav .grp{font-size:11px;letter-spacing:.08em;padding:14px 12px 4px;opacity:.7}
+.rail-foot{padding:16px 24px 0;border-top:1px solid var(--rail-line);font-size:12px;line-height:1.7}
+.rail-foot b{color:var(--rail-active);font-weight:500}
+
+main{padding:32px max(32px,env(safe-area-inset-right)) 64px max(32px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:36px;max-width:1280px;width:100%}
+.topline{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+h1{font-family:var(--f-display);font-weight:600;font-size:28px;line-height:1.35;margin:6px 0 4px;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:66ch}
+.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted)}
+.chip b{color:var(--ink);font-weight:600;white-space:nowrap}
+.chip.alert{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.chip.err{border-color:var(--bad);color:var(--bad);background:var(--bad-bg)}
+.btn{font-size:13px;color:var(--ink);cursor:pointer;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;display:inline-flex;align-items:center;font-weight:500}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08);color:var(--surface)}
+.btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.saved{font-size:12.5px;color:var(--muted);width:100%;text-align:right}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
+.dot.idle{border:2px dashed var(--idle)}
+.tick-key{width:2px;height:12px;background:var(--ink);display:inline-block}
+
+section{display:flex;flex-direction:column;gap:16px;scroll-margin-top:24px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+h2{font-size:19px;font-weight:600;margin:0}
+h2 .no{color:var(--muted);font-weight:500;margin-right:6px}
+.sec-head p{margin:0;font-size:13px;color:var(--muted)}
+.desc{margin:-6px 0 0;font-size:13.5px;color:var(--muted)}
+.desc span{font-size:12.5px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+
+.donuts{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(168px,1fr))}
+.donuts.big{grid-template-columns:minmax(0,1.25fr) repeat(4,minmax(0,1fr))}
+.dcard{padding:18px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;min-width:0}
+.dcard.total{background:var(--accent-soft);border-color:transparent}
+.dcard svg{width:100%;max-width:132px;height:auto;display:block}
+.dcard.total svg{max-width:156px}
+.dcard .lbl{font-size:14px;font-weight:600;line-height:1.4}
+.dcard .sub{font-size:12.5px;color:var(--muted);line-height:1.5}
+.dcard a{text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.dcard a:hover .lbl{color:var(--accent)}
+.d-track{stroke:var(--soft)} .dcard.total .d-track{stroke:var(--surface)}
+.d-idle{stroke:var(--idle);stroke-dasharray:3 4}
+.d-val{font-family:var(--f-display);font-weight:600;fill:var(--ink)}
+.d-cap{fill:var(--muted)}
+
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+table.wide{min-width:1180px} table.mid{min-width:780px}
+th{text-align:left;font-size:12px;letter-spacing:.03em;color:var(--muted);font-weight:500;padding:11px 12px;border-bottom:1px solid var(--line);background:var(--soft);white-space:nowrap}
+thead tr:first-child th:first-child{border-top-left-radius:10px} thead tr:first-child th:last-child{border-top-right-radius:10px}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tr.sum td{background:var(--soft)}
+.num{text-align:right;white-space:nowrap}
+.now{font-weight:700}
+.cur-col{background:color-mix(in srgb,var(--accent-soft) 60%,transparent)}
+td .nm{font-weight:600}
+td .tp{font-size:11.5px;color:var(--muted)}
+td.note{color:var(--muted);font-size:12.5px;min-width:220px;max-width:340px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.pill.good{color:var(--good);background:var(--good-bg)} .pill.warn{color:var(--warn);background:var(--warn-bg)}
+.pill.bad{color:var(--bad);background:var(--bad-bg)} .pill.idle{color:var(--idle);background:var(--idle-bg)}
+.pill.fix{color:var(--accent);background:var(--accent-soft)}
+.prov{font-size:11.5px;color:var(--warn);display:block}
+.tfoot-note{font-size:12.5px;color:var(--muted);padding:11px 14px;border-top:1px solid var(--line)}
+
+.fixes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.fixes h3{font-size:15px;margin:0;padding:16px 18px 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fixes h3 .count{font-size:12.5px;color:var(--muted);font-weight:500;margin-left:auto}
+.fixes ul{list-style:none;margin:0;padding:4px 0 8px}
+.fixes li{padding:10px 18px;font-size:13.5px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:start}
+.fixes li+li{border-top:1px solid var(--line)}
+.fixes li small{color:var(--muted);font-size:12.5px;grid-column:1}
+.fixes li.done .t{text-decoration:line-through;color:var(--muted)}
+
+.timeline{list-style:none;margin:0;padding:6px 0}
+.timeline li{display:grid;grid-template-columns:104px 74px minmax(0,1fr);gap:12px;align-items:center;padding:12px 20px}
+.timeline li+li{border-top:1px solid var(--line)}
+.timeline .date{font-weight:600}
+.dday{font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:2px 6px;text-align:center}
+.dday.past{color:var(--warn);background:var(--warn-bg)}
+.timeline small{display:block;color:var(--muted);font-size:12.5px}
+footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+.loading{padding:60px 0;color:var(--muted);text-align:center}
+
+/* 실적 입력 패널 */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--surface);z-index:41;display:flex;flex-direction:column;border-left:1px solid var(--line);box-shadow:-12px 0 40px rgba(0,0,0,.18)}
+.drawer header{padding:20px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:max(20px,env(safe-area-inset-top))}
+.drawer header h2{font-size:17px}
+.drawer .body{flex:1;overflow-y:auto;padding:18px 22px 24px;display:flex;flex-direction:column;gap:18px}
+.drawer footer{border-top:1px solid var(--line);padding:14px 22px max(14px,env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.drawer footer .msg{margin-right:auto;font-size:13px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label,.field .lab{font-size:12.5px;color:var(--muted);font-weight:500}
+.field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--bg);color:var(--ink)}
+.field textarea{min-height:56px;resize:vertical;font-size:13px}
+.field input:focus,.field textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+fieldset{border:1px solid var(--line);border-radius:10px;padding:14px 14px 16px;margin:0;display:flex;flex-direction:column;gap:14px}
+legend{font-weight:600;font-size:14.5px;padding:0 6px}
+.subedit{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px dashed var(--line)}
+.subedit:first-of-type{border-top:0;padding-top:0}
+.subedit .h{font-size:13.5px;font-weight:600}
+.subedit .h span{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.check input{margin-top:4px;width:16px;height:16px;accent-color:var(--accent)}
+.banner{border:1px solid var(--warn);background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:13px}
+.banner button{margin-left:8px}
+.err-text{color:var(--bad);font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:13.5px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:calc(100% - 32px)}
+
+@media (max-width:1180px){.donuts.big{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))}}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{height:auto;padding:12px max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left));z-index:5;top:0}
+  .brand{padding:0 0 10px;border:0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .brand .name{font-size:16px;margin:0}
+  .nav{flex-direction:row;overflow-x:auto;padding:0 0 8px;gap:4px}
+  .nav a{white-space:nowrap;padding:8px 12px}
+  .nav a.on::before,.nav .grp,.rail-foot{display:none}
+  main{padding:24px max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left))}
+  .fixes{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){
+  h1{font-size:23px}
+  .donuts,.donuts.big{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dcard.total{grid-column:1/-1}
+  .timeline li{grid-template-columns:84px 64px minmax(0,1fr);padding:12px 14px}
+  .row{grid-template-columns:minmax(0,1fr)}
+}
+/* AI 요약 보고서 모달 */
+.btn.ai{border-color:var(--teal);color:var(--teal);font-weight:600}
+.btn.ai:hover{background:color-mix(in srgb,var(--teal) 10%,var(--surface));color:var(--teal);border-color:var(--teal)}
+.modal-scrim{position:fixed;inset:0;background:var(--scrim);z-index:50;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom))}
+.modal{background:var(--surface);color:var(--ink);width:min(820px,100%);max-height:100%;display:flex;flex-direction:column;border-radius:14px;border:1px solid var(--line);box-shadow:0 24px 64px rgba(0,0,0,.28);overflow:hidden}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:20px 24px 16px;border-bottom:1px solid var(--line)}
+.modal-head h2{font-family:var(--f-display);font-size:21px;display:flex;align-items:center;gap:8px}
+.modal-head .ai-tag{font-family:var(--f-body);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--teal);border:1px solid var(--teal);border-radius:4px;padding:1px 6px}
+.modal-head p{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
+.modal-body{overflow-y:auto;padding:20px 24px 24px;display:flex;flex-direction:column;gap:22px}
+.modal-foot{border-top:1px solid var(--line);padding:12px 24px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.modal-foot .note{margin-right:auto;font-size:12px;color:var(--muted)}
+.rp-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:10px}
+.rp-strip div{padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.rp-strip div+div{border-left:1px solid var(--line)}
+.rp-strip .k{font-size:12px;color:var(--muted)}
+.rp-strip .pill{align-self:flex-start;margin-top:2px}
+.rp-strip .v{font-family:var(--f-display);font-size:24px;font-weight:600;line-height:1.2}
+.rp-strip .v small{font-size:13px;color:var(--muted);font-weight:500;margin-left:2px}
+.rp-sec{display:flex;flex-direction:column;gap:10px}
+.rp-sec h3{margin:0;font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.rp-sec h3::before{content:"";width:3px;height:14px;border-radius:2px;background:var(--accent)}
+.rp-lead{margin:0;font-size:15px;line-height:1.75;max-width:70ch}
+.rp-rows{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px}
+.rp-row{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 56px;gap:8px 14px;align-items:center;padding:11px 14px}
+.rp-row+.rp-row{border-top:1px solid var(--line)}
+.rp-row .n{font-weight:600;font-size:13.5px}
+.rp-row .why{grid-column:1/-1;font-size:12.5px;color:var(--muted);margin-top:-4px}
+.rp-bar{position:relative;height:8px;border-radius:4px;background:var(--soft)}
+.rp-bar i{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.rp-bar b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);border-radius:1px}
+.rp-row .pct{text-align:right;font-weight:700;font-size:13.5px}
+.rp-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rp-list li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;font-size:13.5px;align-items:start}
+.rp-list li small{display:block;color:var(--muted);font-size:12.5px}
+.rp-ai{border:1px dashed var(--teal);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:color-mix(in srgb,var(--teal) 5%,var(--surface))}
+.rp-ai .txt{font-size:14px;line-height:1.75;white-space:pre-wrap}
+.rp-ai .muted{font-size:12.5px;color:var(--muted)}
+@media (max-width:640px){
+  .rp-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rp-strip div:nth-child(3){border-left:0}
+  .rp-strip div:nth-child(n+3){border-top:1px solid var(--line)}
+  .rp-row{grid-template-columns:minmax(0,1fr) 56px}
+  .rp-row .rp-bar{grid-column:1/-1;grid-row:2}
+  .modal-head,.modal-body,.modal-foot{padding-left:16px;padding-right:16px}
+}
+body.print-report .app,body.print-report .drawer,body.print-report .scrim{display:none!important}
+@media print{
+  body.print-report .modal-scrim{position:static;background:none;padding:0;display:block}
+  body.print-report .modal{box-shadow:none;border:0;max-height:none;width:100%}
+  body.print-report .modal-body{overflow:visible}
+  body.print-report .modal-foot,body.print-report .modal-head button{display:none!important}
+}
+@media print{
+  :root{--bg:#fff}
+  .rail,.no-print,.drawer,.scrim,.toast{display:none!important}
+  .app{display:block} main{max-width:none;padding:0}
+  .panel,section{break-inside:avoid}
+  .tablewrap{overflow:visible} table.wide,table.mid{min-width:0;font-size:10.5px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="univ" id="orgLabel">전문대학 혁신지원사업</div>
+      <div class="name" id="titleLabel">자율성과지표 관리</div>
+    </div>
+    <nav class="nav" aria-label="주요 메뉴" id="nav">
+      <a href="#overview" class="on">종합현황</a>
+    </nav>
+    <div class="rail-foot">
+      사업기간 <b id="periodLabel">-</b><br>
+      현재 <b id="railYear">-</b>
+    </div>
+  </aside>
+
+  <main>
+    <section id="overview">
+      <div class="topline">
+        <div>
+          <div class="eyebrow" id="eyebrow">-</div>
+          <h1>자율성과지표 진척 현황</h1>
+          <p class="lede">실적을 자율성과지표 정의서의 산출식과 연차별 목표에 맞춰 보여 줍니다. 연중 집계되는 누적형 지표는 데이터 기준일까지 지난 기간의 비율(경과율)과 비교하고, 학년도 말에 측정하는 시점형 지표는 측정 전으로 따로 표시합니다.</p>
+        </div>
+        <div class="meta">
+          <span class="chip">오늘 <b id="todayLabel">-</b></span>
+          <span class="chip" id="dataChip">데이터 기준 <b>-</b></span>
+          <span class="chip" id="connChip" hidden>서버 연결 끊김</span>
+          <button type="button" class="btn no-print" id="themeBtn" aria-label="화면 테마 전환"><svg id="themeIcon" viewBox="0 0 24 24"></svg><span id="themeText">다크 모드</span></button>
+          <button type="button" class="btn no-print" id="printBtn"><svg viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg>인쇄</button>
+          <button type="button" class="btn ai no-print" id="reportBtn"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>AI 요약 보고서</button>
+          <button type="button" class="btn primary no-print" id="editBtn"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>실적 입력</button>
+          <div class="saved" id="savedLabel"></div>
+        </div>
+      </div>
+
+      <div class="legend" aria-label="판정 기준">
+        <span><i class="dot good"></i>양호 · 경과율 이상</span>
+        <span><i class="dot warn"></i>주의 · 경과율의 70% 이상</span>
+        <span><i class="dot bad"></i>부진 · 경과율의 70% 미만</span>
+        <span><i class="dot idle"></i>측정 전 (학년도 말 측정)</span>
+        <span><i class="tick-key"></i>경과율 <b id="paceLabel" style="color:var(--ink)">-</b></span>
+      </div>
+
+      <div class="donuts big" id="overviewDonuts"><div class="loading">데이터를 불러오는 중입니다…</div></div>
+
+      <div class="panel">
+        <div class="tablewrap"><table class="mid">
+          <thead><tr id="overviewHead"></tr></thead>
+          <tbody id="overviewBody"></tbody>
+        </table></div>
+        <div class="tfoot-note">잠정 지수는 정의서 산출식에 현재 값을 넣은 결과입니다. 시점형 지표가 측정되기 전이라 연말 목표와 바로 비교하지 않고, 진척 판단은 누적형 진척률로 합니다. 전체 진척률은 4개 지표의 단순 평균(각 25%)입니다.</div>
+      </div>
+    </section>
+
+    <div id="indicatorSections" style="display:flex;flex-direction:column;gap:36px"></div>
+
+    <section id="fixes">
+      <div class="sec-head"><h2>데이터 정리</h2><p>원본 파일 점검 결과와 처리 상태 · 완료 표시는 실적 입력에서</p></div>
+      <div class="fixes" id="fixList"></div>
+    </section>
+
+    <section id="schedule">
+      <div class="sec-head"><h2>측정 일정</h2><p>정의서의 측정방법 기준</p></div>
+      <div class="panel"><ol class="timeline" id="timeline"></ol></div>
+    </section>
+
+    <footer>출처 · 2026학년도 자율성과지표 2분기(엑셀), 지표성과관리(자율지표 정의서 및 1차년도 달성도). 진척률과 판정은 이 화면에서 다시 계산한 값입니다.</footer>
+  </main>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="실적 입력" role="dialog" aria-modal="true">
+  <header>
+    <h2>실적 입력</h2>
+    <button type="button" class="btn" id="closeDrawer">닫기</button>
+  </header>
+  <div class="body" id="drawerBody"></div>
+  <footer id="drawerFoot" hidden>
+    <span class="msg" id="drawerMsg"></span>
+    <button type="button" class="btn" id="importBtn" hidden>백업 불러오기</button><input type="file" id="importFile" accept=".json,application/json" hidden>
+    <button type="button" class="btn" id="backupBtn">백업 내려받기</button>
+    <button type="button" class="btn primary" id="saveBtn">저장</button>
+  </footer>
+</aside>
+<div class="modal-scrim" id="reportScrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="modal-head">
+      <div><h2 id="reportTitle">요약 보고서 <span class="ai-tag">AI</span></h2><p id="reportSub"></p></div>
+      <button type="button" class="btn" id="reportClose">닫기</button>
+    </div>
+    <div class="modal-body" id="reportBody"></div>
+    <div class="modal-foot">
+      <span class="note">현재 입력된 실적으로 자동 작성되었습니다. 수치를 고치면 보고서도 바뀝니다.</span>
+      <button type="button" class="btn" id="reportCopy">텍스트 복사</button>
+      <button type="button" class="btn" id="reportPrint">보고서 인쇄</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+<script id="seed" type="application/json">{"meta": {"org": "전문대학 혁신지원사업", "title": "자율성과지표 관리", "programStart": "2025-03-01", "programEnd": "2028-02-29", "dataDate": "2026-08-31", "periodLabel": "2분기", "version": 1, "updatedAt": "2026-10-16T00:00:00", "updatedBy": "초기 데이터(엑셀 2분기·정의서)"}, "kpis": [{"id": "k1", "no": "①", "name": "미래교육혁신지수", "base": 57.1, "targets": [76.5, 88.3, 100], "actuals": [88.0, null, null], "rates": [115.0, null, null], "definition": "고등직업교육의 미래교육 전환을 위한 교육체계 혁신 역량", "formula": "융합교육 운영 20% + AI기반 학습자 맞춤형 학습지원 30% + 재학생 교육만족도 50% (각 세부지수 ÷ 3차년도 목표 × 100)", "subs": [{"name": "융합교육 운영", "unit": "건", "type": "cum", "w": 0.2, "base": 2, "targets": [4, 6, 8], "actuals": [5, null, null], "cur": 3, "prov": null, "dept": "학사운영팀", "note": "마이크로디그리 3건. 나노디그리·융합전공 미입력(작년 융합전공 2건 운영)"}, {"name": "AI기반 학습자 맞춤형 학습지원", "unit": "명", "type": "cum", "w": 0.3, "base": 7, "targets": [44, 61, 78], "actuals": [65, null, null], "cur": 7, "prov": null, "dept": "교수학습지원센터", "note": "AI셀터디 7명(운영 중, 집계 전) · AI 적응형 교과 0명(운영 예정)"}, {"name": "재학생 교육만족도", "unit": "점", "type": "pt", "w": 0.5, "base": 80.6, "targets": [80.9, 81.2, 81.5], "actuals": [82.3, null, null], "cur": null, "prov": 73, "dept": "IR센터", "note": "학년도 말 수요자 만족도 조사. 엑셀 입력값 73점은 출처 미확인"}]}, {"id": "k2", "no": "②", "name": "학생지원혁신지수", "base": 88.4, "targets": [91.8, 96.1, 100], "actuals": [100.3, null, null], "rates": [109.3, null, null], "definition": "맞춤형 심리적응, 취·창업, 진로 지원 등 학생지원 혁신 역량", "formula": "AI기반 진로·취업 설계 참여 50% + 재학생 수 유지율 50% (각 세부지수 ÷ 3차년도 목표 × 100)", "subs": [{"name": "AI기반 진로·취업 설계 참여", "unit": "명", "type": "cum", "w": 0.5, "base": 445, "targets": [490, 535, 580], "actuals": [595, null, null], "cur": 434, "prov": null, "dept": "취업지원센터", "note": "AI면접·자기소개서·진로적성검사 참여. 2026.07.10 공문(8.31 기준)"}, {"name": "재학생 수 유지율", "unit": "%", "type": "pt", "w": 0.5, "base": 92.6, "targets": [91.8, 92.6, 92.6], "actuals": [90.8, null, null], "cur": null, "prov": null, "dept": "학사운영팀", "note": "4.1자 대비 10.1자 재학생 비율. 엑셀 수식 오류(E13+E14)로 0 처리되던 값을 측정 전으로 분리"}]}, {"id": "k3", "no": "③", "name": "지·산·학글로컬혁신지수", "base": 97.7, "targets": [98.4, 99.2, 100], "actuals": [106.0, null, null], "rates": [107.7, null, null], "definition": "지역사회·산업 맞춤형 인재양성을 위한 지·산·학 협력과 글로벌 역량", "formula": "지·산·학 협력교육 40% + 열린평생직업교육 40% + 재학생 글로벌 핵심역량 향상 20% (각 세부지수 ÷ 3차년도 목표 × 100)", "subs": [{"name": "지·산·학 협력교육", "unit": "건", "type": "cum", "w": 0.4, "base": 1173, "targets": [1185, 1197, 1209], "actuals": [1240, null, null], "cur": 813, "prov": null, "dept": "학사운영팀·현장실습지원센터", "note": "정규 캡스톤 2 + 비정규 2 + 현장실습 확정 809명. 계획 기준(1,120명) 반영 시 1,124건"}, {"name": "열린평생직업교육", "unit": "명", "type": "cum", "w": 0.4, "base": 1030, "targets": [1040, 1050, 1060], "actuals": [927, null, null], "cur": 434, "prov": null, "dept": "학사운영팀", "note": "교양 320 · 전공 47 · 군복학 0 · 유아교육과 40 · 유학생 27. 유아교육과 중복 여부 확인 필요"}, {"name": "재학생 글로벌 핵심역량 향상", "unit": "점", "type": "pt", "w": 0.2, "base": 0.2, "targets": [0.2, 0.2, 0.2], "actuals": [0.3, null, null], "cur": null, "prov": 0.18, "dept": "IR센터", "note": "학년도 초·말 핵심역량 진단. 엑셀 입력값 0.18점은 잠정"}]}, {"id": "k4", "no": "④", "name": "사회적책무혁신지수", "base": 81.3, "targets": [85.1, 92.5, 100], "actuals": [102.2, null, null], "rates": [120.2, null, null], "definition": "공유·협력 모델 확산과 책무성 강화 등 대학의 사회적 가치 실현 역량", "formula": "재학생 도덕성 역량 향상 30% + 인적·물적 자원 공유·협력 30% + 성과 공유·확산 40% (각 세부지수 ÷ 3차년도 목표 × 100)", "subs": [{"name": "재학생 도덕성(Altruism) 역량 향상", "unit": "점", "type": "pt", "w": 0.3, "base": 0.1, "targets": [0.2, 0.2, 0.2], "actuals": [null, null, null], "cur": null, "prov": 0.18, "dept": "IR센터", "note": "학년도 초·말 핵심역량 진단. 1차 세부 실적 원문 누락"}, {"name": "인적·물적 자원 공유·협력", "unit": "건", "type": "cum", "w": 0.3, "base": 108, "targets": [113, 118, 123], "actuals": [null, null, null], "cur": 71, "prov": null, "dept": "기획팀·교육환경지원팀", "note": "공동교과목 1 · 학점교류 2 · 교육공간 공유 68. 인적자원 공유 미입력"}, {"name": "성과 공유·확산", "unit": "건", "type": "cum", "w": 0.4, "base": 32, "targets": [22, 27, 32], "actuals": [null, null, null], "cur": 18, "prov": null, "dept": "기획팀", "note": "벤치마킹·포럼·워크숍·발표. 2차 목표(27)가 기준값(32)보다 낮게 설정됨"}]}], "fixes": [{"id": "f1", "kind": "applied", "title": "재학생 유지율 수식 오류를 미입력으로 분리", "detail": "엑셀 E15가 재학인원을 더하는 수식(E13+E14)이라 0으로 계산되던 값입니다. 10.1자 재학인원 확정 전까지 측정 전으로 둡니다.", "owner": "", "done": true}, {"id": "f2", "kind": "applied", "title": "현장실습은 확정 실적 809명으로 계산", "detail": "엑셀의 1,120명은 미이수 예상치를 뺀 계획 기준입니다. 계획 기준 수치는 비고에 함께 적었습니다.", "owner": "", "done": true}, {"id": "f3", "kind": "applied", "title": "시점형 지표 잠정값 구분", "detail": "교육만족도 73점, 글로벌역량·도덕성 0.18점은 출처가 없어 잠정값으로만 표시하고 진척률 판정에서 제외했습니다.", "owner": "", "done": true}, {"id": "f4", "kind": "applied", "title": "정의서 목표값 통일", "detail": "미래교육 연차 목표는 76.5와 88.3(산출식 표의 71.6, 85.9는 오기), 학생지원 1차 유지율 실적은 90.8%(수식의 91.2는 오기)를 씁니다.", "owner": "", "done": true}, {"id": "f5", "kind": "todo", "title": "유아교육과 학점인정 중복 계상 여부 확인", "detail": "'전공 학점인정(유교과 포함)'과 '유아교육과 전공 학점인정'이 따로 집계됩니다. 1차 927명과 2분기 434명 모두 해당합니다.", "owner": "학사운영팀", "done": false}, {"id": "f6", "kind": "todo", "title": "융합교육 나노디그리·융합전공 실적 입력", "detail": "작년에 융합전공 2건이 운영됐는데 올해 칸이 비어 있습니다.", "owner": "학사운영팀", "done": false}, {"id": "f7", "kind": "todo", "title": "인적자원 공유 실적 입력, 교육공간 공유 감소 원인 확인", "detail": "교육공간 68건으로 기준년도 105건보다 적습니다.", "owner": "기획팀·교육환경지원팀", "done": false}, {"id": "f8", "kind": "todo", "title": "사회적책무 1차 세부산출내역 보완", "detail": "지표성과관리 문서에 지수 102.2만 있고 세부지수 실적이 없습니다.", "owner": "기획팀", "done": false}, {"id": "f9", "kind": "todo", "title": "엑셀 달성현황 시트를 세부현황 시트와 연결", "detail": "값을 직접 입력한 칸을 '계' 셀 참조로 바꾸고, M~O열의 이전 양식 잔여 열을 지웁니다.", "owner": "기획팀", "done": false}, {"id": "f10", "kind": "todo", "title": "유지율 측정 기준 통일", "detail": "정의서는 4.1자 대비 10.1자, 엑셀 비고와 1차 실적은 1학기 대비 2학기로 되어 있습니다.", "owner": "학사운영팀·IR센터", "done": false}], "events": [{"date": "2026-10-01", "approx": false, "title": "재학인원 기준일 (10.1자)", "note": "재학생 수 유지율 산출 가능 · 학사운영팀 자료 수합"}, {"date": "2026-12-01", "approx": true, "title": "수요자 만족도 조사 · 핵심역량 사후 진단", "note": "교육만족도, 글로벌역량, 도덕성 산출 · IR센터 (학년도 말, 날짜 미정)"}, {"date": "2027-02-28", "approx": false, "title": "2차년도 실적 집계 마감", "note": "누적형 지표 집계 기간 3.1 ~ 차년도 2월 말"}]}</script>
+
+<script>
+"use strict";
+/* ---------- 공통 ---------- */
+const $ = s => document.querySelector(s);
+const DAY = 86400000;
+const pad = n => String(n).padStart(2, "0");
+const parseD = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const fmtDate = d => `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => v == null ? "—" : Number(v).toLocaleString("ko-KR", {maximumFractionDigits: 2});
+const idx = v => v == null ? "—" : Number(v).toFixed(1);
+let S = null, C = null, TODAY = startOfDay(new Date());
+let editing = false, PIN = "", EDITOR = "";
+const LOCAL = location.protocol === "file:";   // 더블클릭으로 연 경우: 이 PC 브라우저에만 저장
+const LS_KEY = "kpi-data-v1";
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k, v); return true; } catch(e){ return false; } };
+
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3200); }
+
+/* ---------- 테마 ---------- */
+const root = document.documentElement, mq = matchMedia("(prefers-color-scheme: dark)");
+const ICON_MOON = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+const ICON_SUN = '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : mq.matches;
+function paintThemeBtn(){ const d = isDark(); $("#themeIcon").innerHTML = d ? ICON_SUN : ICON_MOON; $("#themeText").textContent = d ? "라이트 모드" : "다크 모드"; }
+try { const s = localStorage.getItem("theme"); if (s === "dark" || s === "light") root.dataset.theme = s; } catch(e){}
+$("#themeBtn").addEventListener("click", () => { const n = isDark() ? "light" : "dark"; root.dataset.theme = n; try { localStorage.setItem("theme", n); } catch(e){} paintThemeBtn(); });
+mq.addEventListener?.("change", paintThemeBtn);
+paintThemeBtn();
+$("#printBtn").addEventListener("click", () => window.print());
+
+/* ---------- 계산 ---------- */
+function context(){
+  const dd = parseD(S.meta.dataDate);
+  const fy = dd.getMonth() >= 2 ? dd.getFullYear() : dd.getFullYear() - 1;
+  const fs = new Date(fy, 2, 1), fe = new Date(fy + 1, 2, 0);
+  const pace = Math.min(100, Math.max(0, ((dd - fs)/DAY + 1) / ((fe - fs)/DAY + 1) * 100));
+  const startY = parseD(S.meta.programStart).getFullYear();
+  const yi = Math.min(2, Math.max(0, fy - startY));
+  const years = [0,1,2].map(i => `${i+1}차('${String(startY+i).slice(2)})`);
+  return { dd, fy, pace, yi, years, startY };
+}
+const prog = s => (s.cur == null || !s.targets[C.yi]) ? null : s.cur / s.targets[C.yi] * 100;
+const judge = p => p == null ? "idle" : p >= C.pace ? "good" : p >= C.pace * 0.7 ? "warn" : "bad";
+const LABEL = {good:"양호", warn:"주의", bad:"부진", idle:"측정 전"};
+const pill = st => `<span class="pill ${st}">${LABEL[st]}</span>`;
+function derive(){
+  C = context();
+  S.kpis.forEach(k => {
+    const cum = k.subs.filter(s => s.type === "cum" && prog(s) != null);
+    const w = cum.reduce((a,s) => a + s.w, 0);
+    k._progress = w ? cum.reduce((a,s) => a + s.w * prog(s), 0) / w : null;
+    let ok = true;
+    const v = k.subs.reduce((a,s) => { const x = s.cur ?? s.prov; if (x == null) ok = false; return a + (x ?? 0) / s.targets[2] * 100 * s.w; }, 0);
+    k._prov = ok ? v : null;
+    k._missing = k.subs.filter(s => s.cur == null && s.prov == null).map(s => s.name);
+  });
+  const ps = S.kpis.map(k => k._progress).filter(p => p != null);
+  C.total = ps.length ? ps.reduce((a,b) => a+b, 0) / ps.length : null;
+}
+
+/* ---------- 도넛 ---------- */
+function donut(p, status, o = {}){
+  const r = 48, sw = o.big ? 12 : 10, c = 2*Math.PI*r;
+  const color = {good:"var(--good)", warn:"var(--warn)", bad:"var(--bad)", idle:"var(--idle)"}[status];
+  const a = C.pace/100*2*Math.PI - Math.PI/2;
+  const pt = d => [(60 + d*Math.cos(a)).toFixed(1), (60 + d*Math.sin(a)).toFixed(1)];
+  const [x1,y1] = pt(r - sw/2 - 3), [x2,y2] = pt(r + sw/2 + 3);
+  let body;
+  if (p == null) {
+    body = `<circle cx="60" cy="60" r="${r}" fill="none" class="d-idle" stroke-width="2"/>
+      <text x="60" y="${o.prov != null ? 58 : 64}" text-anchor="middle" class="d-cap" font-size="13">측정 전</text>
+      ${o.prov != null ? `<text x="60" y="76" text-anchor="middle" class="d-cap" font-size="11">잠정 ${esc(o.prov)}</text>` : ""}`;
+  } else {
+    const shown = Math.min(p, 100);
+    body = `<circle cx="60" cy="60" r="${r}" fill="none" class="d-track" stroke-width="${sw}"/>
+      <circle cx="60" cy="60" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${(shown/100*c).toFixed(2)} ${c.toFixed(2)}" transform="rotate(-90 60 60)"/>
+      <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+      <text x="60" y="${o.cap ? 62 : 66}" text-anchor="middle" class="d-val" font-size="${o.big ? 24 : 22}">${p.toFixed(1)}<tspan font-size="12" dx="1">%</tspan></text>
+      ${o.cap ? `<text x="60" y="80" text-anchor="middle" class="d-cap" font-size="11">${esc(o.cap)}</text>` : ""}`;
+  }
+  return `<svg viewBox="0 0 120 120" role="img" aria-label="${esc(o.title)}"><title>${esc(o.title)}</title>${body}</svg>`;
+}
+
+/* ---------- 화면 ---------- */
+function render(){
+  derive();
+  const m = S.meta;
+  $("#orgLabel").textContent = m.org; $("#titleLabel").textContent = m.title; document.title = m.title;
+  $("#periodLabel").textContent = `${m.programStart.slice(0,7).replace("-",".")} ~ ${m.programEnd.slice(0,7).replace("-",".")}`;
+  $("#railYear").textContent = `${C.yi+1}차년도`;
+  $("#eyebrow").textContent = `${C.fy}년 ${C.yi+1}차년도 · 종합현황`;
+  $("#paceLabel").textContent = C.pace.toFixed(1) + "%";
+  if (m.updatedAt) { const u = new Date(m.updatedAt); $("#savedLabel").textContent = `최근 저장 ${fmtDate(u)} ${pad(u.getHours())}:${pad(u.getMinutes())} · ${m.updatedBy || ""}`; }
+  renderDates();
+
+  $("#nav").innerHTML = `<a href="#overview">종합현황</a><div class="grp">지표별 현황</div>` +
+    S.kpis.map(k => `<a href="#${esc(k.id)}">${esc(k.no)} ${esc(k.name.replace(/지수$/,""))}</a>`).join("") +
+    `<div class="grp">관리</div><a href="#fixes">데이터 정리</a><a href="#schedule">측정 일정</a>`;
+
+  const T = C.total;
+  $("#overviewDonuts").innerHTML =
+    `<div class="panel dcard total">${donut(T, judge(T), {big:true, cap:"누적형 평균", title:`전체 진척률 ${T==null?"-":T.toFixed(1)+"%"}, 경과율 ${C.pace.toFixed(1)}%`})}
+      <div><div class="lbl">전체 진척률</div><div class="sub">${S.kpis.length}개 지표 단순 평균 · ${pill(judge(T))}</div></div></div>` +
+    S.kpis.map(k => `<div class="panel dcard"><a href="#${esc(k.id)}">${donut(k._progress, judge(k._progress), {title:`${k.name} 누적형 진척률 ${k._progress==null?"-":k._progress.toFixed(1)+"%"}`})}
+      <span class="lbl">${esc(k.no)} ${esc(k.name)}</span></a>
+      <div class="sub">잠정 지수 ${k._prov==null?"산출 불가":idx(k._prov)} / 목표 ${idx(k.targets[C.yi])}</div></div>`).join("");
+
+  const py = C.yi > 0 ? C.yi - 1 : null;
+  $("#overviewHead").innerHTML = `<th>지표</th><th class="num">기준값</th>${py!=null?`<th class="num">${C.years[py]} 실적</th><th class="num">${C.years[py]} 달성률</th>`:""}<th class="num">${C.years[C.yi]} 목표</th><th class="num">잠정 지수</th><th class="num">누적형 진척률</th><th>판정</th>`;
+  $("#overviewBody").innerHTML = S.kpis.map(k => `<tr>
+    <td><a href="#${esc(k.id)}" class="nm" style="text-decoration:none">${esc(k.no)} ${esc(k.name)}</a></td>
+    <td class="num">${idx(k.base)}</td>
+    ${py!=null?`<td class="num">${idx(k.actuals[py])}</td><td class="num">${k.rates[py]==null?"—":idx(k.rates[py])+"%"}</td>`:""}
+    <td class="num">${idx(k.targets[C.yi])}</td>
+    <td class="num">${k._prov==null?`<span class="tp">산출 불가</span><span class="prov">${esc(k._missing.join(", "))} 미입력</span>`:idx(k._prov)}</td>
+    <td class="num now">${k._progress==null?"—":k._progress.toFixed(1)+"%"}</td>
+    <td>${pill(judge(k._progress))}</td></tr>`).join("");
+
+  $("#indicatorSections").innerHTML = S.kpis.map(renderKpi).join("");
+  renderFixes();
+  bindNav();
+}
+
+function renderKpi(k){
+  const yearHead = C.years.map((y,i) => `<th class="num${i===C.yi?" cur-col":""}">${y} 목표</th><th class="num${i===C.yi?" cur-col":""}">${y} ${i===C.yi?"현재":"실적"}</th>`).join("");
+  const cell = (s, i) => {
+    const cls = i===C.yi ? " cur-col" : "";
+    let a;
+    if (i < C.yi) a = num(s.actuals[i]);
+    else if (i === C.yi) a = s.cur != null ? `<b>${num(s.cur)}</b>` : (s.prov != null ? `<span class="tp">미측정</span><span class="prov">잠정 ${num(s.prov)}</span>` : `<span class="tp">미입력</span>`);
+    else a = "—";
+    return `<td class="num${cls}">${num(s.targets[i])}</td><td class="num${cls}">${a}</td>`;
+  };
+  return `<section id="${esc(k.id)}">
+    <div class="sec-head"><h2><span class="no">${esc(k.no)}</span>${esc(k.name)}</h2>
+      <p>누적형 진척률 <b style="color:var(--ink)">${k._progress==null?"—":k._progress.toFixed(1)+"%"}</b>${C.yi>0&&k.rates[C.yi-1]!=null?` · ${C.years[C.yi-1]} 달성률 ${idx(k.rates[C.yi-1])}%`:""}</p></div>
+    <p class="desc">${esc(k.definition)}<br><span>산출식 · ${esc(k.formula)}</span></p>
+    <div class="donuts">${k.subs.map(s => { const p = prog(s); return `<div class="panel dcard">
+      ${donut(p, judge(p), {prov:s.prov, title:`${s.name} ${p==null?"측정 전":p.toFixed(1)+"%"}`})}
+      <div><div class="lbl">${esc(s.name)}</div><div class="sub">${p==null?`목표 ${num(s.targets[C.yi])}${esc(s.unit)} · ${s.type==="pt"?"학년도 말 측정":"미입력"}`:`${num(s.cur)} / ${num(s.targets[C.yi])}${esc(s.unit)}`} · 비중 ${Math.round(s.w*100)}%</div></div></div>`; }).join("")}</div>
+    <div class="panel"><div class="tablewrap"><table class="wide">
+      <thead><tr><th>세부지수</th><th class="num">비중</th><th class="num">기준값</th>${yearHead}<th class="num cur-col">진척률</th><th>판정</th><th>담당</th><th>비고</th></tr></thead>
+      <tbody>${k.subs.map(s => { const p = prog(s); return `<tr>
+        <td><span class="nm">${esc(s.name)}</span> <span class="tp">(${esc(s.unit)}) · ${s.type==="cum"?"누적형":"시점형"}</span></td>
+        <td class="num">${Math.round(s.w*100)}%</td><td class="num">${num(s.base)}</td>
+        ${[0,1,2].map(i => cell(s,i)).join("")}
+        <td class="num cur-col now">${p==null?"—":p.toFixed(1)+"%"}</td><td>${pill(judge(p))}</td>
+        <td>${esc(s.dept)}</td><td class="note">${esc(s.note)}</td></tr>`; }).join("")}
+        <tr class="sum"><td><span class="nm">${esc(k.name)} (합성)</span></td><td class="num">100%</td><td class="num">${idx(k.base)}</td>
+        ${[0,1,2].map(i => { const cls = i===C.yi?" cur-col":""; const a = i<C.yi ? idx(k.actuals[i]) : i===C.yi ? (k._prov==null?'<span class="tp">산출 불가</span>':`<span class="tp">잠정</span> <b>${idx(k._prov)}</b>`) : "—"; return `<td class="num${cls}">${idx(k.targets[i])}</td><td class="num${cls}">${a}</td>`; }).join("")}
+        <td class="num cur-col now">${k._progress==null?"—":k._progress.toFixed(1)+"%"}</td><td>${pill(judge(k._progress))}</td><td>—</td><td class="note">진척률은 누적형 세부지수의 가중 평균</td></tr>
+      </tbody></table></div></div>
+  </section>`;
+}
+
+function renderFixes(){
+  const group = (kind, title, pillCls, pillTxt) => {
+    const items = S.fixes.filter(f => f.kind === kind);
+    const done = items.filter(f => f.done).length;
+    return `<div class="panel"><h3><span class="pill ${pillCls}">${pillTxt}</span>${title}<span class="count">${kind==="todo"?`${done}/${items.length} 완료`:`${items.length}건`}</span></h3><ul>
+      ${items.map(f => `<li class="${kind==="todo"&&f.done?"done":""}"><span class="t">${esc(f.title)}</span>${kind==="todo"?(f.done?'<span class="pill good">완료</span>':'<span class="pill warn">진행 중</span>'):""}
+        <small>${esc(f.detail)}${f.owner?` · ${esc(f.owner)}`:""}</small></li>`).join("")}</ul></div>`;
+  };
+  $("#fixList").innerHTML = group("applied","이 화면에 바로잡아 반영","fix","반영 완료") + group("todo","담당 부서 확인 후 수정","warn","원본 수정 필요");
+}
+
+function renderDates(){
+  $("#todayLabel").textContent = fmtDate(TODAY);
+  const stale = Math.round((TODAY - C.dd) / DAY);
+  const chip = $("#dataChip");
+  chip.classList.toggle("alert", stale > 45);
+  chip.title = stale > 45 ? "다음 분기 실적으로 갱신이 필요합니다" : "";
+  chip.innerHTML = `데이터 기준 <b>${fmtDate(C.dd)} (${esc(S.meta.periodLabel)})</b>${stale > 45 ? ` · ${stale}일 경과` : ""}`;
+  $("#timeline").innerHTML = S.events.map(e => {
+    const d = parseD(e.date), n = Math.round((d - TODAY) / DAY);
+    const tag = n > 0 ? `D-${n}` : n === 0 ? "D-Day" : "지남";
+    return `<li><span class="date">${e.approx ? "학년도 말" : fmtDate(d)}</span><span class="dday ${n<0&&!e.approx?"past":""}">${e.approx ? "예정" : tag}</span><div>${esc(e.title)}<small>${esc(e.note)}</small></div></li>`;
+  }).join("");
+}
+
+let navHandler;
+function bindNav(){
+  const links = [...document.querySelectorAll(".nav a")];
+  const secs = links.map(a => document.querySelector(a.getAttribute("href")));
+  if (navHandler) removeEventListener("scroll", navHandler);
+  navHandler = () => { let cur = 0; secs.forEach((s,i) => { if (s && s.getBoundingClientRect().top < 160) cur = i; }); links.forEach((a,i) => a.classList.toggle("on", i===cur)); };
+  addEventListener("scroll", navHandler, {passive:true}); navHandler();
+}
+
+/* ---------- 서버 통신 ---------- */
+async function load(){
+  if (LOCAL) {
+    const saved = lsGet(LS_KEY);
+    S = saved ? JSON.parse(saved) : JSON.parse(document.getElementById("seed").textContent);
+    return render();
+  }
+  const r = await fetch("/api/data", {cache:"no-store"});
+  if (!r.ok) throw new Error("load");
+  S = await r.json(); render();
+}
+async function poll(){
+  if (LOCAL) return;
+  try {
+    const r = await fetch("/api/version", {cache:"no-store"});
+    const v = await r.json();
+    $("#connChip").hidden = true;
+    if (S && v.version !== S.meta.version) {
+      if (editing) { $("#staleBanner") && ($("#staleBanner").hidden = false); }
+      else { await load(); toast(`${v.updatedBy || "다른 사용자"}님이 저장한 내용을 불러왔습니다`); }
+    }
+  } catch(e) { const c = $("#connChip"); c.hidden = false; c.className = "chip err"; }
+}
+
+/* ---------- 실적 입력 ---------- */
+function openDrawer(){
+  editing = true; $("#scrim").hidden = false; $("#drawer").hidden = false; document.body.style.overflow = "hidden";
+  EDITOR = EDITOR || lsGet("editor") || (LOCAL ? "이 PC" : "");
+  showForm();
+}
+function closeDrawer(){ editing = false; $("#scrim").hidden = true; $("#drawer").hidden = true; document.body.style.overflow = ""; poll(); }
+$("#editBtn").addEventListener("click", openDrawer);
+$("#closeDrawer").addEventListener("click", closeDrawer);
+$("#scrim").addEventListener("click", closeDrawer);
+addEventListener("keydown", e => { if (e.key === "Escape" && editing) closeDrawer(); });
+
+function showPin(){
+  $("#drawerFoot").hidden = true;
+  $("#drawerBody").innerHTML = `<form id="pinForm" style="display:flex;flex-direction:column;gap:14px">
+    <p style="margin:0;font-size:13.5px;color:var(--muted)">실적은 입력 권한이 있는 담당자만 저장할 수 있습니다. 관리자에게 받은 PIN을 입력하세요.</p>
+    <div class="field"><label for="editorName">입력자 이름</label><input id="editorName" autocomplete="name" placeholder="예: 기획팀 홍길동" value="${esc(EDITOR || (()=>{try{return localStorage.getItem("editor")||""}catch(e){return ""}})())}" required></div>
+    <div class="field"><label for="pinInput">PIN</label><input id="pinInput" type="password" inputmode="numeric" autocomplete="off" required></div>
+    <div class="err-text" id="pinErr" hidden>PIN이 맞지 않습니다. 관리자에게 확인해 주세요.</div>
+    <div><button class="btn primary" type="submit">확인</button></div></form>`;
+  $("#editorName").focus();
+  $("#pinForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const pin = $("#pinInput").value, name = $("#editorName").value.trim();
+    try {
+      const r = await fetch("/api/verify", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({pin})});
+      if (!r.ok) { $("#pinErr").hidden = false; return; }
+      PIN = pin; EDITOR = name; try { localStorage.setItem("editor", name); } catch(e){}
+      showForm();
+    } catch(err) { $("#pinErr").textContent = "서버에 연결할 수 없습니다."; $("#pinErr").hidden = false; }
+  });
+}
+
+function numInput(id, val, label, extra=""){
+  return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="number" step="any" inputmode="decimal" value="${val==null?"":esc(val)}" placeholder="비워 두면 미입력" ${extra}></div>`;
+}
+function showForm(){
+  $("#drawerFoot").hidden = false; $("#drawerMsg").textContent = LOCAL ? "이 PC 브라우저에 저장됩니다" : "저장하면 접속한 모든 화면에 반영됩니다";
+  const m = S.meta;
+  $("#drawerBody").innerHTML = `
+    <div class="banner" id="staleBanner" hidden>다른 사용자가 먼저 저장했습니다. 지금 저장하면 충돌이 납니다.<button type="button" class="btn" id="reloadBtn">새로 불러오기</button></div>
+    <fieldset><legend>기준 정보</legend>
+      ${LOCAL ? "" : `<div class="field"><label for="editorField">입력자 (변경 이력에 기록)</label><input id="editorField" autocomplete="name" placeholder="예: 기획팀 홍길동" value="${esc(EDITOR)}"></div>`}
+      <div class="row">
+        <div class="field"><label for="m_date">데이터 기준일</label><input id="m_date" type="date" value="${esc(m.dataDate)}"></div>
+        <div class="field"><label for="m_period">구분</label><input id="m_period" value="${esc(m.periodLabel)}" placeholder="예: 3분기"></div>
+      </div>
+    </fieldset>
+    ${S.kpis.map((k,ki) => `<fieldset><legend>${esc(k.no)} ${esc(k.name)}</legend>
+      ${k.subs.map((s,si) => `<div class="subedit">
+        <div class="h">${esc(s.name)}<span>${C.years[C.yi]} 목표 ${num(s.targets[C.yi])}${esc(s.unit)} · ${s.type==="cum"?"누적형":"시점형"}</span></div>
+        <div class="row">
+          ${numInput(`c_${ki}_${si}`, s.cur, s.type==="cum" ? `현재 실적(${s.unit})` : `확정 측정값(${s.unit})`)}
+          ${s.type==="pt" ? numInput(`p_${ki}_${si}`, s.prov, `잠정값(${s.unit}) · 판정 제외`) : `<div class="field"><label for="d_${ki}_${si}">담당</label><input id="d_${ki}_${si}" value="${esc(s.dept)}"></div>`}
+        </div>
+        <div class="field"><label for="n_${ki}_${si}">비고(산출 근거)</label><textarea id="n_${ki}_${si}">${esc(s.note)}</textarea></div>
+      </div>`).join("")}
+    </fieldset>`).join("")}
+    <fieldset><legend>데이터 정리 완료 표시</legend>
+      ${S.fixes.filter(f => f.kind === "todo").map(f => `<label class="check"><input type="checkbox" id="fx_${esc(f.id)}" ${f.done?"checked":""}><span>${esc(f.title)}<br><small style="color:var(--muted)">${esc(f.owner)}</small></span></label>`).join("")}
+    </fieldset>
+    ${LOCAL ? "" : `<fieldset><legend>변경 이력 · 복원</legend><div id="histList" class="muted" style="font-size:13px;color:var(--muted)">불러오는 중…</div></fieldset>`}
+    <p style="margin:0;font-size:12.5px;color:var(--muted)">${LOCAL ? "파일을 직접 열어 쓰는 중이라 입력값은 이 PC의 이 브라우저에만 저장됩니다. 다른 PC로 옮기거나 보관하려면 [백업 내려받기]를 쓰세요." : "저장할 때마다 이전 내용이 변경 이력에 남아 복원할 수 있습니다. 목표값·가중치를 바꿀 때는 [백업 내려받기]로 받은 파일을 고친 뒤 [백업 불러오기]로 올리세요."}</p>`;
+  if (!LOCAL) loadHistory();
+  $("#reloadBtn").addEventListener("click", async () => { await load(); showForm(); toast("최신 내용을 불러왔습니다. 다시 입력해 주세요"); });
+}
+
+function readNum(id){
+  const el = document.getElementById(id); if (!el) return undefined;
+  const v = el.value.trim(); if (v === "") return null;
+  const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : NaN;
+}
+$("#saveBtn").addEventListener("click", async () => {
+  const next = JSON.parse(JSON.stringify(S));
+  const date = $("#m_date").value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { toast("데이터 기준일을 입력해 주세요"); return; }
+  next.meta.dataDate = date; next.meta.periodLabel = $("#m_period").value.trim() || next.meta.periodLabel;
+  let bad = null;
+  next.kpis.forEach((k,ki) => k.subs.forEach((s,si) => {
+    const c = readNum(`c_${ki}_${si}`); if (Number.isNaN(c)) bad = s.name; else s.cur = c;
+    const p = readNum(`p_${ki}_${si}`); if (p !== undefined) { if (Number.isNaN(p)) bad = s.name; else s.prov = p; }
+    const d = document.getElementById(`d_${ki}_${si}`); if (d) s.dept = d.value.trim();
+    s.note = document.getElementById(`n_${ki}_${si}`).value.trim();
+  }));
+  if (bad) { toast(`${bad}: 0 이상의 숫자만 입력할 수 있습니다`); return; }
+  next.fixes.forEach(f => { const el = document.getElementById(`fx_${f.id}`); if (el) f.done = el.checked; });
+  if (!LOCAL) { EDITOR = ($("#editorField")?.value || "").trim(); lsSet("editor", EDITOR); }
+  if (LOCAL) {
+    next.meta.version = (S.meta.version || 0) + 1;
+    const n = new Date(); next.meta.updatedAt = `${isoDate(n)}T${pad(n.getHours())}:${pad(n.getMinutes())}:00`; next.meta.updatedBy = EDITOR;
+    if (!lsSet(LS_KEY, JSON.stringify(next))) { toast("이 브라우저에 저장하지 못했습니다. 백업 내려받기로 파일을 보관하세요"); return; }
+    S = next; render(); closeDrawer(); toast("이 PC 브라우저에 저장했습니다. 중요한 변경 후에는 백업을 내려받아 두세요"); return;
+  }
+  $("#saveBtn").disabled = true;
+  try {
+    const r = await fetch("/api/data", {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify({editor:EDITOR, version:S.meta.version, data:next})});
+    if (r.status === 409) { $("#staleBanner").hidden = false; toast("다른 사용자가 먼저 저장해서 저장하지 못했습니다"); return; }
+    if (!r.ok) { toast("저장하지 못했습니다. 입력값을 확인해 주세요"); return; }
+    S = await r.json(); render(); closeDrawer(); toast("저장했습니다. 접속한 모든 화면에 반영됩니다");
+  } catch(e) { toast("서버에 연결할 수 없어 저장하지 못했습니다"); }
+  finally { $("#saveBtn").disabled = false; }
+});
+$("#backupBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(S, null, 2)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `성과지표-백업-${isoDate(new Date())}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+$("#importBtn").hidden = false;
+$("#importBtn").addEventListener("click", () => $("#importFile").click());
+$("#importFile").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  e.target.value = "";
+  let d;
+  try { d = JSON.parse(await f.text()); if (!d.meta || !Array.isArray(d.kpis)) throw 0; }
+  catch(err) { toast("이 파일은 성과지표 백업 파일이 아닙니다"); return; }
+  if (LOCAL) { lsSet(LS_KEY, JSON.stringify(d)); S = d; render(); closeDrawer(); toast("백업 파일을 불러왔습니다"); return; }
+  try {
+    const r = await fetch("/api/data", {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify({editor:(EDITOR||"이름 없음")+" (백업 불러오기)", version:S.meta.version, data:d})});
+    if (r.status === 409) { toast("다른 사용자가 먼저 저장했습니다. 새로 불러온 뒤 다시 시도해 주세요"); return; }
+    if (!r.ok) throw 0;
+    S = await r.json(); render(); closeDrawer(); toast("백업 파일 내용으로 바꿨습니다. 이전 내용은 변경 이력에 남아 있습니다");
+  } catch(err) { toast("백업을 올리지 못했습니다"); }
+});
+
+/* ---------- 변경 이력 / 복원 ---------- */
+async function loadHistory(){
+  const box = $("#histList"); if (!box) return;
+  try {
+    const list = await (await fetch("/api/history", {cache:"no-store"})).json();
+    if (!list.length) { box.textContent = "아직 저장 이력이 없습니다."; return; }
+    box.innerHTML = `<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px">${list.slice(0,15).map(h => {
+      const t = h.at ? new Date(h.at) : null;
+      return `<li style="display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--ink)"><span>v${esc(h.version)} · ${t ? `${fmtDate(t)} ${pad(t.getHours())}:${pad(t.getMinutes())}` : ""}<br><small style="color:var(--muted)">${esc(h.by || "")}</small></span><button type="button" class="btn" data-restore="${esc(h.key)}">이 시점으로 복원</button></li>`; }).join("")}</ul>`;
+    box.querySelectorAll("[data-restore]").forEach(b => b.addEventListener("click", async () => {
+      if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "한 번 더 누르면 복원"; b.classList.add("primary"); return; }
+      b.disabled = true;
+      try {
+        const r = await fetch("/api/restore", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({key:b.dataset.restore, version:S.meta.version, editor:($("#editorField")?.value||"").trim()})});
+        if (r.status === 409) { toast("다른 사용자가 먼저 저장했습니다. 새로 불러온 뒤 다시 시도해 주세요"); b.disabled = false; return; }
+        if (!r.ok) throw 0;
+        S = await r.json(); render(); closeDrawer(); toast("선택한 시점으로 복원했습니다");
+      } catch(e) { toast("복원하지 못했습니다"); b.disabled = false; }
+    }));
+  } catch(e) { box.textContent = "변경 이력을 불러오지 못했습니다."; }
+}
+
+/* ---------- AI 요약 보고서 ---------- */
+let AI_ENABLED = false, AI_CACHE = {}, REPORT_TEXT = "";
+const sgn = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1);
+function analyze(){
+  const fe = new Date(C.fy + 1, 2, 0);
+  const monthsLeft = Math.max(0.5, (fe - C.dd) / DAY / 30.44);
+  const risks = [], pending = [];
+  S.kpis.forEach(k => k.subs.forEach(s => {
+    const p = prog(s), t = s.targets[C.yi];
+    if (p == null) { pending.push({k, s}); return; }
+    const st = judge(p);
+    if (st === "bad" || st === "warn") {
+      const remain = Math.max(0, t - s.cur);
+      risks.push({k, s, p, st, remain, perMonth: remain / monthsLeft, gap: p - C.pace});
+    }
+  }));
+  risks.sort((a,b) => a.gap - b.gap);
+  const todo = S.fixes.filter(f => f.kind === "todo" && !f.done);
+  return {monthsLeft, risks, pending, todo};
+}
+function weakest(k){
+  const c = k.subs.filter(s => s.type === "cum" && prog(s) != null).sort((a,b) => prog(a) - prog(b));
+  return c[0];
+}
+function buildReport(){
+  derive();
+  const A = analyze(), T = C.total, diff = T - C.pace, m = S.meta;
+  const periodTxt = `${C.fy}년 ${C.yi+1}차년도 ${m.periodLabel}`;
+  const bad = S.kpis.filter(k => judge(k._progress) === "bad"), warn = S.kpis.filter(k => judge(k._progress) === "warn");
+  const good = S.kpis.filter(k => judge(k._progress) === "good").sort((a,b) => b._progress - a._progress);
+  let lead = `${periodTxt} 기준(${fmtDate(C.dd)}) 자율성과지표 전체 진척률은 ${T.toFixed(1)}%로, 연간 경과율 ${C.pace.toFixed(1)}%보다 ${Math.abs(diff).toFixed(1)}%p ${diff >= 0 ? "앞서 있습니다" : "뒤처져 있습니다"}.`;
+  if (good.length) lead += ` ${good.map(k => `${k.no} ${k.name.replace(/지수$/,"")}(${k._progress.toFixed(1)}%)`).join(", ")}은 일정대로 진행 중입니다.`;
+  if (bad.length) lead += ` 반면 ${bad.map(k => `${k.no} ${k.name}`).join(", ")}는 ${bad.map(k => k._progress.toFixed(1) + "%").join(", ")}로 부진하여 집중 관리가 필요합니다.`;
+  if (warn.length) lead += ` ${warn.map(k => `${k.no} ${k.name}`).join(", ")}는 주의 단계입니다.`;
+  if (A.pending.length) lead += ` 학년도 말에 측정하는 ${A.pending.length}개 세부지수는 아직 측정 전이라 최종 지수는 연말에 확정됩니다.`;
+
+  const actions = A.risks.slice(0, 4).map(r => ({
+    who: r.s.dept, what: `${r.s.name} ${num(Math.ceil(r.remain))}${r.s.unit} 추가 확보`,
+    how: `목표 ${num(r.s.targets[C.yi])}${r.s.unit} 중 ${num(r.s.cur)}${r.s.unit} 달성. 남은 약 ${Math.round(A.monthsLeft)}개월 동안 월 ${num(Math.ceil(r.perMonth))}${r.s.unit} 이상 필요`}));
+  if (A.pending.length) actions.push({who: [...new Set(A.pending.map(x => x.s.dept))].join("·"), what: "시점형 지표 측정 일정 확정", how: A.pending.map(x => x.s.name).join(", ") + "의 측정 시기와 자료 제출일을 정해 두기"});
+  if (A.todo.length) actions.push({who: [...new Set(A.todo.map(f => f.owner).filter(Boolean))].slice(0,3).join("·") || "기획팀", what: `데이터 정리 미완료 ${A.todo.length}건 처리`, how: "연차평가 자체평가보고서 작성 전에 원본 파일 수정"});
+
+  const color = st => ({good:"var(--good)", warn:"var(--warn)", bad:"var(--bad)", idle:"var(--idle)"}[st]);
+  $("#reportSub").textContent = `${periodTxt} · 데이터 기준 ${fmtDate(C.dd)} · 작성 ${fmtDate(new Date())}`;
+  $("#reportBody").innerHTML = `
+    <div class="rp-strip">
+      <div><span class="k">전체 진척률</span><span class="v">${T.toFixed(1)}<small>%</small></span>${pill(judge(T))}</div>
+      <div><span class="k">연간 경과율</span><span class="v">${C.pace.toFixed(1)}<small>%</small></span><span class="k">기준일 ${fmtDate(C.dd)}</span></div>
+      <div><span class="k">경과율 대비</span><span class="v" style="color:${diff>=0?"var(--good)":"var(--bad)"}">${sgn(diff)}<small>%p</small></span><span class="k">${diff>=0?"일정보다 앞섬":"일정보다 늦음"}</span></div>
+      <div><span class="k">관리 필요 세부지수</span><span class="v">${A.risks.length}<small>개</small></span><span class="k">측정 전 ${A.pending.length}개 별도</span></div>
+    </div>
+    <div class="rp-sec"><h3>총평</h3><p class="rp-lead">${esc(lead)}</p></div>
+    <div class="rp-sec"><h3>지표별 진척</h3><div class="rp-rows">
+      ${S.kpis.map(k => { const st = judge(k._progress), w = weakest(k); return `<div class="rp-row">
+        <span class="n">${esc(k.no)} ${esc(k.name)}</span>
+        <span class="rp-bar" title="경과율 ${C.pace.toFixed(1)}%"><i style="width:${Math.min(100,k._progress||0)}%;background:${color(st)}"></i><b style="left:${C.pace}%"></b></span>
+        <span class="pct">${k._progress==null?"—":k._progress.toFixed(1)+"%"}</span>
+        <span class="why">${LABEL[st]} · ${w ? `가장 낮은 항목 ${esc(w.name)} ${prog(w).toFixed(1)}%` : "누적형 실적 없음"}${k._prov!=null?` · 잠정 지수 ${idx(k._prov)}/목표 ${idx(k.targets[C.yi])}`:""}</span></div>`; }).join("")}
+    </div></div>
+    <div class="rp-sec"><h3>집중 관리 세부지수</h3>
+      ${A.risks.length ? `<ul class="rp-list">${A.risks.map(r => `<li>${pill(r.st)}<div><b>${esc(r.k.no)} ${esc(r.s.name)}</b> ${r.p.toFixed(1)}% (경과율 대비 ${sgn(r.gap)}%p)<small>${num(r.s.cur)} / ${num(r.s.targets[C.yi])}${esc(r.s.unit)} · 남은 ${num(Math.ceil(r.remain))}${esc(r.s.unit)}, 월 ${num(Math.ceil(r.perMonth))}${esc(r.s.unit)} 이상 필요 · ${esc(r.s.dept)}</small></div></li>`).join("")}</ul>` : `<p class="rp-lead" style="font-size:14px">경과율에 못 미치는 누적형 세부지수가 없습니다.</p>`}
+    </div>
+    <div class="rp-sec"><h3>권고 조치</h3><ul class="rp-list">
+      ${actions.map((a,i) => `<li><span class="pill fix">${i+1}</span><div><b>${esc(a.what)}</b><small>${esc(a.who)} · ${esc(a.how)}</small></div></li>`).join("")}
+    </ul></div>
+    ${A.pending.length ? `<div class="rp-sec"><h3>측정 전 항목</h3><ul class="rp-list">${A.pending.map(x => `<li>${pill("idle")}<div>${esc(x.k.no)} ${esc(x.s.name)}<small>목표 ${num(x.s.targets[C.yi])}${esc(x.s.unit)}${x.s.prov!=null?` · 잠정 ${num(x.s.prov)}${esc(x.s.unit)}(판정 제외)`:""} · ${esc(x.s.dept)}</small></div></li>`).join("")}</ul></div>` : ""}
+    <div class="rp-ai" id="aiBox">${AI_ENABLED ? `<div><b>AI 문장 보고서</b> <span class="muted">· 위 분석을 바탕으로 보고용 문장을 작성합니다</span></div><div class="txt" id="aiText"></div><div><button type="button" class="btn ai" id="aiRun">AI로 보고 문안 작성</button></div>`
+      : `<div><b>AI 문장 보고서</b></div><div class="muted">${LOCAL ? "파일을 직접 연 상태에서는 위의 자동 분석만 제공합니다. 사이트로 접속하면 AI 문장 작성을 쓸 수 있습니다." : "Netlify 환경 변수에 ANTHROPIC_API_KEY를 등록하면 AI가 보고용 문장을 써 줍니다. 지금은 자동 분석만 제공합니다."}</div>`}</div>`;
+
+  REPORT_TEXT = [
+    `[자율성과지표 요약 보고] ${periodTxt} (데이터 기준 ${fmtDate(C.dd)})`, "",
+    `■ 전체 진척률 ${T.toFixed(1)}% / 경과율 ${C.pace.toFixed(1)}% (${sgn(diff)}%p)`, "",
+    "■ 총평", lead, "",
+    "■ 지표별 진척", ...S.kpis.map(k => `- ${k.no} ${k.name}: ${k._progress==null?"—":k._progress.toFixed(1)+"%"} (${LABEL[judge(k._progress)]})`), "",
+    "■ 집중 관리", ...(A.risks.length ? A.risks.map(r => `- ${r.s.name}: ${r.p.toFixed(1)}%, 남은 ${Math.ceil(r.remain)}${r.s.unit} (월 ${Math.ceil(r.perMonth)}${r.s.unit} 이상) · ${r.s.dept}`) : ["- 해당 없음"]), "",
+    "■ 권고 조치", ...actions.map((a,i) => `${i+1}. ${a.what} (${a.who}) - ${a.how}`),
+    ...(A.pending.length ? ["", "■ 측정 전", ...A.pending.map(x => `- ${x.s.name} (${x.s.dept})`)] : [])
+  ].join("\n");
+  if (AI_ENABLED) {
+    const cached = AI_CACHE[S.meta.version];
+    if (cached) $("#aiText").textContent = cached;
+    $("#aiRun").addEventListener("click", runAI);
+  }
+}
+async function runAI(){
+  const btn = $("#aiRun"); btn.disabled = true; btn.textContent = "작성 중…";
+  $("#aiText").textContent = "";
+  try {
+    const r = await fetch("/api/summary", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({version:S.meta.version, facts:REPORT_TEXT})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || "실패");
+    AI_CACHE[S.meta.version] = d.text; $("#aiText").textContent = d.text;
+    btn.textContent = "다시 작성";
+  } catch(e) { $("#aiText").textContent = "AI 문안을 받지 못했습니다. " + e.message; btn.textContent = "다시 시도"; }
+  finally { btn.disabled = false; }
+}
+function openReport(){
+  if (!S) return;
+  buildReport(); $("#reportScrim").hidden = false; document.body.style.overflow = "hidden"; $("#reportClose").focus();
+}
+function closeReport(){ $("#reportScrim").hidden = true; document.body.style.overflow = ""; $("#reportBtn").focus(); }
+$("#reportBtn").addEventListener("click", openReport);
+$("#reportClose").addEventListener("click", closeReport);
+$("#reportScrim").addEventListener("click", e => { if (e.target.id === "reportScrim") closeReport(); });
+addEventListener("keydown", e => { if (e.key === "Escape" && !$("#reportScrim").hidden) closeReport(); });
+$("#reportPrint").addEventListener("click", () => {
+  document.body.classList.add("print-report");
+  const done = () => { document.body.classList.remove("print-report"); removeEventListener("afterprint", done); };
+  addEventListener("afterprint", done); window.print(); setTimeout(done, 1500);
+});
+$("#reportCopy").addEventListener("click", async () => {
+  const ai = AI_ENABLED && $("#aiText") && $("#aiText").textContent.trim();
+  const text = REPORT_TEXT + (ai ? "\n\n■ AI 보고 문안\n" + ai : "");
+  try { await navigator.clipboard.writeText(text); toast("보고서 내용을 복사했습니다"); }
+  catch(e) {
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("보고서 내용을 복사했습니다"); } catch(err) { toast("복사하지 못했습니다"); }
+    ta.remove();
+  }
+});
+if (!LOCAL) fetch("/api/ai-status", {cache:"no-store"}).then(r => r.json()).then(d => { AI_ENABLED = !!d.enabled; }).catch(() => {});
+
+/* ---------- 시작 ---------- */
+load().then(() => { if (LOCAL) $("#drawerMsg").textContent = ""; }).catch(() => { $("#overviewDonuts").innerHTML = '<div class="loading">서버에서 데이터를 불러오지 못했습니다. 네트워크 연결을 확인한 뒤 새로고침해 주세요.</div>'; });
+setInterval(() => { if (!document.hidden) poll(); }, 60000);
+setInterval(() => { const t = startOfDay(new Date()); if (S && t.getTime() !== TODAY.getTime()) { TODAY = t; renderDates(); } }, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && S) { TODAY = startOfDay(new Date()); renderDates(); poll(); } });
+</script>
+</body>
+</html>

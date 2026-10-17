@@ -1,0 +1,10 @@
+{
+  "name": "kpi-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "전문대학 혁신지원사업 자율성과지표 관리 (Netlify)",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.3"
+  }
+}
